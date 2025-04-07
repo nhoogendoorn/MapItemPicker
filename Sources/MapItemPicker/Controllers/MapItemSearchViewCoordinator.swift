@@ -139,21 +139,20 @@ extension MapItemPickerController: MKMapViewDelegate {
     }
     
     // This function is necessary since the annotation handed to `mapView(_ mapView: MKMapView, didDeselect annotation: MKAnnotation)` is sometimes nil. Casting this within the original function works in debug builds, but not in release builds (due to optimization, propably).
+    @MainActor
     private func didDeselect(optional annotation: MKAnnotation?) {
         guard let annotation = annotation else { return }
-        
-        Task { @MainActor in
-            if let cluster = annotation as? MKClusterAnnotation, cluster == selectedMapItemCluster {
-                selectedMapItemCluster = nil
-            } else if
-                let eq1 = annotation as? MapAnnotationEquatable,
-                let eq2 = selectedMapItem as? MapAnnotationEquatable,
-                eq1.annotationIsEqual(to: eq2)
-            {
-                selectedMapItem = nil
-            } else if annotation === selectedMapItem {
-                selectedMapItem = nil
-            }
+
+        if let cluster = annotation as? MKClusterAnnotation, cluster == selectedMapItemCluster {
+            selectedMapItemCluster = nil
+        } else if
+            let eq1 = annotation as? MapAnnotationEquatable,
+            let eq2 = selectedMapItem as? MapAnnotationEquatable,
+            eq1.annotationIsEqual(to: eq2)
+        {
+            selectedMapItem = nil
+        } else if annotation === selectedMapItem {
+            selectedMapItem = nil
         }
     }
     
